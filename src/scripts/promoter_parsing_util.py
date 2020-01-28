@@ -86,7 +86,7 @@ def QC_DNA_sequences(promoter_sequence_df):
 
     # filter rows that don't only contain nucleotide sequence
     promoter_sequence_df = promoter_sequence_df.fillna('').replace('NaN','')
-    promoter_sequence_df = promoter_sequence_df[~promoter_sequence_df['DNA sequence'].str.contains('[^atcg]')]
+    promoter_sequence_df = promoter_sequence_df[(~promoter_sequence_df['DNA sequence'].str.contains('[^atcg]')) & (promoter_sequence_df['DNA sequence'].str.len() > 0)]
     promoter_sequence_df.reset_index()
     new_sequence_number = promoter_sequence_df.shape[0]
 
