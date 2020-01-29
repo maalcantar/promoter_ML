@@ -37,9 +37,11 @@ def parse_EPDnew(save_csv=False):
     """
     parse through EPDnew database and apply QC / filtering
 
-    inputs: boolean argument indicating whether csv files should be saved
+    inputs
+    save_csv: boolean argument indicating whether csv files should be saved
 
-    outputs: dataframe containing EPDnew promoters and metadata,
+    outputs
+    EPDnew_promoters_df: dataframe containing EPDnew promoters and metadata,
             if save_csv, then csv file is saved to data directory
 
     """
@@ -137,7 +139,9 @@ def plot_EPDnew_data(motifs_occurances_df, save_plot=False):
     """
     create bar plot showing EPDnew promoters stratified by organism and motif
 
-    # inputs: dataframe containing EPDnew organisms x motifs (the output of EPDnew_motifs function)
+    # inputs
+    motifs_occurances_df: dataframe containing EPDnew organisms x motifs (the output of EPDnew_motifs function)
+    save_plot: boolean indicating whether plot should be saved
 
     # outputs: if save_plot, then a bar plot is saved
     """
@@ -173,9 +177,11 @@ def parse_RegulonDB(save_csv=False):
     """
     parse through RegulonDB database and apply QC / filtering
 
-    inputs: boolean argument indicating whether csv files should be saved
+    inputs
+    save_csv: boolean argument indicating whether csv files should be saved
 
-    outputs: dataframe containing RegulonDB promoters and metadata,
+    outputs
+    regulonDB_promoters_df: dataframe containing RegulonDB promoters and metadata,
             if save_csv, then csv file is saved to data directory
 
     """
@@ -195,7 +201,9 @@ def plot_RegulonDB_data(Ecoli_sigma_factor_occurances, save_plot=False):
     """
     create bar plot showing RegulonDB promoters stratified by cognate sigma factor
 
-    # inputs: dataframe containing RegulonDB organisms x motifs (the output of RegulonDB_motifs function)
+    # inputs
+    Ecoli_sigma_factor_occurances: dataframe containing RegulonDB organisms x motifs (the output of RegulonDB_motifs function)
+    save_plot: boolean indicating whether plots should be saved
 
     # outputs: if save_plot, then a bar plot is saved
     """
@@ -225,9 +233,11 @@ def parse_DBTBS(save_csv=False):
     """
     parse through DBTBS database and apply QC / filtering
 
-    inputs: boolean argument indicating whether csv files should be saved
+    inputs
+    save_csv: boolean argument indicating whether csv files should be saved
 
-    outputs: dataframe containing DBTBS promoters and metadata,
+    outputs
+    DBTBS_promoters_df: dataframe containing DBTBS promoters and metadata,
             if save_csv, then csv file is saved to data directory
 
     """
@@ -251,9 +261,11 @@ def plot_DBTBS_data(Bsubtilis_sigma_factor_occurances, save_plot=False):
     """
     create bar plot showing DBTBS promoters stratified by cognate sigma factor
 
-    # inputs: dataframe containing DBTBS organisms x motifs (the output of DBTBS_motifs function)
-
-    # outputs: if save_plot, then a bar plot is saved
+    # inputs
+    Bsubtilis_sigma_factor_occurances: dataframe containing DBTBS organisms x motifs (the output of DBTBS_motifs function)
+    save_plot: boolean indicating whether plot should be saved
+    # outputs
+     if save_plot, then a bar plot is saved
     """
 
     Bsubtilis_sigma_factor_occurances.astype(int).plot.barh(figsize=(10,7), color = '#6E8DAB')
@@ -279,9 +291,11 @@ def parse_bacterial_inducible_promoters(save_csv=True):
     """
     parse through bacterial inducible promoters obtained from Meyer et al 2019 and apply QC / filtering
 
-    inputs: boolean argument indicating whether csv files should be saved
+    inputs
+    save_csv: boolean argument indicating whether csv files should be saved
 
-    outputs: dataframe containing bacterial inducible promoters and metadata,
+    outputs
+    inducible_promoters_bact_df: dataframe containing bacterial inducible promoters and metadata,
             if save_csv, then csv file is saved to data directory
 
     """
@@ -302,9 +316,11 @@ def parse_fungal_inducible_promoters(save_csv=False):
     """
     parse through fungal inducible promoters obtained from various sources and apply QC / filtering
 
-    inputs: boolean argument indicating whether csv files should be saved
+    inputs
+    save_csv: boolean argument indicating whether csv files should be saved
 
-    outputs: dataframe containing DBTBS promoters and metadata,
+    outputs
+    inducible_promoters_fungus_df: dataframe containing DBTBS promoters and metadata,
             if save_csv, then csv file is saved to data directory
 
     """
@@ -324,7 +340,10 @@ def inducible_promoters_count(inducible_promoters_bact_df_to_concat, inducible_p
     """
     stratify inducible promoters by organism (e.g., fungal, bacterial, mammalian)
 
-    inputs: dataframes for bacterial and fungal inducible promoters
+    inputs
+    inducible_promoters_bact_df_to_concat: dataframe for bacterial inducible promoters
+    inducible_promoters_fungus_df_to_concat: dataframe for fungal inducible promoters
+    save_csv: boolean indicating whether csv should be saved
 
     outputs: dataframe containing inducible promoter counts
     """
@@ -343,11 +362,11 @@ def inducible_promoters_count(inducible_promoters_bact_df_to_concat, inducible_p
 
 
     inducible_promoters_counts_df = pd.DataFrame(columns = ["Promoters total", "Original promoters", "Varients"])
-    inducible_promoters_counts_df.loc['Mammalian', 'Promoters total'] = 6
+    inducible_promoters_counts_df.loc['Mammalian', 'Promoters total'] = 0
     inducible_promoters_counts_df.loc['Bacteria', 'Promoters total'] = inducible_promoters_bact_df_to_concat.shape[0]
     inducible_promoters_counts_df.loc['Fungi', 'Promoters total'] = inducible_promoters_fungus_df_to_concat.shape[0]
 
-    inducible_promoters_counts_df.loc['Mammalian', 'Original promoters'] = 6 - mammalian_inducible_promoter_varients_count
+    inducible_promoters_counts_df.loc['Mammalian', 'Original promoters'] = 0 - mammalian_inducible_promoter_varients_count
     inducible_promoters_counts_df.loc['Bacteria', 'Original promoters'] = inducible_promoters_bact_df_to_concat.shape[0] - bact_inducible_promoter_varients_count
     inducible_promoters_counts_df.loc['Fungi', 'Original promoters'] = inducible_promoters_fungus_df_to_concat.shape[0] - fungus_inducible_promoter_varients_count
 
@@ -367,9 +386,12 @@ def plot_inducible_promoters(inducible_promoters_counts_df, save_plot=True):
     """
     create bar plot showing DBTBS promoters stratified by cognate sigma factor
 
-    # inputs: dataframe containing DBTBS organisms x motifs (the output of DBTBS_motifs function)
-
-    # outputs: if save_plot, then a bar plot is saved
+    # inputs
+    inducible_promoters_counts_df: dataframe containing DBTBS organisms x motifs (the output of DBTBS_motifs function)
+    save_plot: boolean indicating whether plot should be saved
+    
+    # outputs
+     if save_plot, then a bar plot is saved
     """
 
     black = '#000000'
