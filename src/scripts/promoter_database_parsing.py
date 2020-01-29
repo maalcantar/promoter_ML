@@ -129,7 +129,7 @@ def parse_EPDnew(save_csv=False):
 
     # save as csv
     if save_csv:
-        EPDnew_promoters_df.to_csv('../../data/parsed_promoter_data/20191125_EPDnew_promoters.csv')
+        EPDnew_promoters_df.to_csv('../../data/parsed_promoter_data/20191125_EPDnew_promoters.csv',index=False)
 
     return(EPDnew_promoters_df)
 
@@ -192,7 +192,7 @@ def parse_RegulonDB(save_csv=False):
     regulonDB_promoters_df = QC_DNA_sequences(regulonDB_promoters_df)
 
     if save_csv:
-        regulonDB_promoters_df.to_csv('../../data/parsed_promoter_data/20191202_RegulonDB_promoters.csv')
+        regulonDB_promoters_df.to_csv('../../data/parsed_promoter_data/20191202_RegulonDB_promoters.csv',index=False)
 
     return(regulonDB_promoters_df)
 
@@ -252,7 +252,7 @@ def parse_DBTBS(save_csv=False):
 
     # save to csv
     if save_csv:
-        DBTBS_promoters_df.to_csv("../../data/parsed_promoter_data/20191129_DBTBS_promoter_sequences.csv")
+        DBTBS_promoters_df.to_csv("../../data/parsed_promoter_data/20191129_DBTBS_promoter_sequences.csv",index=False)
 
     return(DBTBS_promoters_df)
 
@@ -306,7 +306,7 @@ def parse_bacterial_inducible_promoters(save_csv=True):
     inducible_promoters_bact_df = QC_DNA_sequences(inducible_promoters_bact_df)
 
     if save_csv:
-        inducible_promoters_bact_df.to_csv("../../data/parsed_promoter_data/20191129_bacterial_inducible_promoters.csv")
+        inducible_promoters_bact_df.to_csv("../../data/parsed_promoter_data/20191129_bacterial_inducible_promoters.csv",index=False)
 
 
     return(inducible_promoters_bact_df)
@@ -331,7 +331,7 @@ def parse_fungal_inducible_promoters(save_csv=False):
     inducible_promoters_fungus_df = QC_DNA_sequences(inducible_promoters_fungus_df)
 
     if save_csv:
-        inducible_promoters_fungus_df.to_csv("../../data/parsed_promoter_data/20200128_fungal_inducible_promoter_sequences.csv")
+        inducible_promoters_fungus_df.to_csv("../../data/parsed_promoter_data/20200128_fungal_inducible_promoter_sequences.csv",index=False)
 
     return(inducible_promoters_fungus_df)
 
@@ -378,7 +378,7 @@ def inducible_promoters_count(inducible_promoters_bact_df_to_concat, inducible_p
     inducible_promoters_counts_df = inducible_promoters_counts_df.astype('int')
 
     if save_csv:
-        inducible_promoters_counts_df.to_csv('../../data/parsed_promoter_data/20200128_inducible_promoter_counts.csv')
+        inducible_promoters_counts_df.to_csv('../../data/parsed_promoter_data/20200128_inducible_promoter_counts.csv',index=False)
     return(inducible_promoters_counts_df)
 
 def plot_inducible_promoters(inducible_promoters_counts_df, save_plot=True):
@@ -389,7 +389,7 @@ def plot_inducible_promoters(inducible_promoters_counts_df, save_plot=True):
     # inputs
     inducible_promoters_counts_df: dataframe containing DBTBS organisms x motifs (the output of DBTBS_motifs function)
     save_plot: boolean indicating whether plot should be saved
-    
+
     # outputs
      if save_plot, then a bar plot is saved
     """
@@ -459,6 +459,6 @@ def main():
                 inducible_promoters_fungus_df_to_concat],
                 sort=False).reset_index().drop('index', axis=1)
 
-    promoters_df.to_csv("../../data/parsed_promoter_data/20191203_promoters.csv")
+    promoters_df.to_csv("../../data/parsed_promoter_data/20191203_promoters.csv",index=False)
 
 main()

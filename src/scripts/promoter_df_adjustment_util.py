@@ -22,3 +22,14 @@ def trim_promter_seq(promoter_df, new_range, dataset_to_trim):
     outputs:
     promoter_df: dataframe with updated promoter sequences
     """
+
+    if dataset_to_trim == 'EPDnew':
+        prom
+    elif dataset_to_trim == 'RegulonDB':
+        db = 'RegulonDB'
+    elif dataset_to_trim == 'DBTBS':
+        db = 'DBTBS'
+    elif dataset_to_trim == 'Meyer et al 2019 (PMID: 30478458)':
+        db = 'bacterial inducible promoters'
+    else:
+        db = 'fungal inducible promoters'

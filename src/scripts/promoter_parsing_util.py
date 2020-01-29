@@ -20,10 +20,12 @@ def calc_range(promoter_sequence_df):
     calculate range of provided promoter sequences, with respect to the TSS.
     this is done based on the delimiter '/', which surrounds the TSS (+1).
 
-    inputs: dataframe containing promoter sequences. sequences must be under column
+    inputs
+    promoter_sequence_df: dataframe containing promoter sequences. sequences must be under column
     named "range (with respect to TSS)".
 
-    outputs: dataframe containing promoter sequences with updated "range (with respect to TSS)".
+    outputs
+    promoter_sequence_df: dataframe containing promoter sequences with updated "range (with respect to TSS)".
     """
 
     # loop through dataframe and update range if there is a '/' marking the TSS
@@ -49,10 +51,12 @@ def QC_DNA_sequences(promoter_sequence_df):
     iv) removing sequences that don't contain canonical nucleotides: a, t, c, g
     this function also prints out the number of sequences filtered
 
-    inputs: dataframe containing promoter sequences. sequences must be under column
+    inputs
+    promoter_sequence_df: dataframe containing promoter sequences. sequences must be under column
     named "range (with respect to TSS)".
 
-    outputs: dataframe that has undergone QC and filtering
+    outputs
+    promoter_sequence_df: dataframe that has undergone QC and filtering
     """
 
     original_sequence_number = promoter_sequence_df.shape[0]
@@ -85,7 +89,7 @@ def QC_DNA_sequences(promoter_sequence_df):
     promoter_sequence_df['DNA sequence'] = sequences
 
     # filter rows that don't only contain nucleotide sequence
-    promoter_sequence_df = promoter_sequence_df.fillna('').replace('NaN','')
+    promoter_sequence_df = promoter_sequence_df.fillna('').replace('NaN','').replace('ND','').replace('None','')
     promoter_sequence_df = promoter_sequence_df[(~promoter_sequence_df['DNA sequence'].str.contains('[^atcg]')) & (promoter_sequence_df['DNA sequence'].str.len() > 0)]
     promoter_sequence_df.reset_index()
     new_sequence_number = promoter_sequence_df.shape[0]
@@ -101,11 +105,14 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
     standardize column names for dataframe containing promoter sequences and metadata.
     new columns are also added, according the selected database
 
-    inputs: dataframe containing promoter sequences and metedata,
-            string indicating promoter database or type. valid string inputs are: "RegulonDB", DBTBS
+    inputs
+    promoter_sequence_df: dataframe containing promoter sequences and metedata
+    promoter_df_or_type: string indicating promoter database or type.
+        valid string inputs are: "RegulonDB", "DBTBS"
                 string input is NOT case-sensitive
 
-    outputs: dataframe containing promoter sequences with updated column names
+    outputs
+    promoter_sequence_df: dataframe containing promoter sequences with updated column names
     """
 
     # standardized column names for RegulonDB dataframe
@@ -145,8 +152,24 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
 
         # standardize range syntax
         DBTBS_range_list = list(promoter_sequence_df['range (with respect to TSS)'])
-        DBTBS_range_list_renamed = [str(seq_range).replace(':', ' to ') for seq_range in DBTBS_range_list]
-        promoter_sequence_df['range (with respect to TSS)'] = DBTBS_range_list_renamed
+        range_new_list = []
+        for range_orig_list in DBTBS_range_list:
+            range_orig_splt = str(range_orig_list).split(':')
+            if len(range_orig_splt) > 1:
+                if int(range_orig_splt[0]) < 0:
+                    range_orig_lower_range = str(int(range_orig_splt[0]) + 1)
+                else:
+                    range_orig_lower_range = range_orig_splt[0]
+
+                range_orig_upper_range = range_orig_splt[1]
+                range_new = range_orig_lower_range + ' to ' + range_orig_upper_range
+            else:
+                range_new = range_orig_splt
+            range_new_list.append(range_new)
+        # DBTBS_range_list_renamed = [str(seq_range).replace(':', ' to ') for seq_range in DBTBS_range_list]
+        # promoter_sequence_df['range (with respect to TSS)'] = DBTBS_range_list_renamed
+
+        promoter_sequence_df['range (with respect to TSS)'] = range_new_list
     else:
         print('Error! Please enter a valid promoter dataframe or type: \'RegulonDB\' or \'DBTBS\'')
 
@@ -158,10 +181,12 @@ def reorganize_promoter_df_columns(promoter_sequence_df):
     reorganize promoter dataframe columns such that they are consistent between databases.
     this will involve dropping some unnecessary columns
 
-    inputs: dataframe containing promoter sequences
+    inputs
+    promoter_sequence_df: dataframe containing promoter sequences
         this dataframe will ideally have been passed through the rename_promoter_df_columns function if needed
 
-    outputs: dataframe with reordered columns
+    outputs
+    promoter_sequence_df: dataframe with reordered columns
     """
 
     columns_to_conserve = ['organism', 'database/source', 'DNA sequence', 'regulated gene',
@@ -186,10 +211,12 @@ def EPDnew_motifs(EPDnew_promoters_df, save_csv=False):
     """
     stratify EPDnew promoters by motif and organism
 
-    inputs: EPDnew promoter dataframe,
-            boolean indicating whether to save csv
+    inputs
+    EPDnew_promoters_df: EPDnew promoter dataframe,
+    save_csv: boolean indicating whether to save csv
 
-    outputs: dataframe containing matrix of organism x motif (nonTATA, TATA, Inr-pfa, nonInr-pfa, total)
+    outputs
+    motifs_occurances_df: dataframe containing matrix of organism x motif (nonTATA, TATA, Inr-pfa, nonInr-pfa, total)
 
     """
 
@@ -230,7 +257,7 @@ def EPDnew_motifs(EPDnew_promoters_df, save_csv=False):
     motifs_occurances_df = motifs_occurances_df.astype('int')
 
     if save_csv:
-        motifs_occurances_df.to_csv('../../data/parsed_promoter_data/20191125_EPDnew_motifs_occurances.csv')
+        motifs_occurances_df.to_csv('../../data/parsed_promoter_data/20191125_EPDnew_motifs_occurances.csv',index=False)
 
     return(motifs_occurances_df)
 
@@ -239,10 +266,12 @@ def RegulonDB_motifs(regulonDB_promoters, save_csv=False):
     """
     stratify RegulonDB promoters by sigma factor that binds promoter
 
-    inputs: RegulonDB promoter dataframe,
-            boolean indicating whether to save csv
+    inputs
+    regulonDB_promoters: RegulonDB promoter dataframe,
+    save_csv: boolean indicating whether to save csv
 
-    outputs: dataframe containing matrix of sigma factor x number of promoters
+    outputs
+    Ecoli_sigma_factor_occurances: dataframe containing matrix of sigma factor x number of promoters
     """
 
     # define E. coli sigma factors
@@ -276,7 +305,7 @@ def RegulonDB_motifs(regulonDB_promoters, save_csv=False):
     Ecoli_sigma_factor_occurances = Ecoli_sigma_factor_occurances.astype('int')
 
     if save_csv:
-        Ecoli_sigma_factor_occurances.to_csv('../../data/parsed_promoter_data/20191202_RegulonDB_sigma_factor_occurances.csv')
+        Ecoli_sigma_factor_occurances.to_csv('../../data/parsed_promoter_data/20191202_RegulonDB_sigma_factor_occurances.csv', index=False)
 
     return(Ecoli_sigma_factor_occurances)
 
@@ -286,10 +315,12 @@ def DBTBS_motifs(DBTBS_promoters_df, save_csv=False):
     stratify DBTBS promoters by sigma factor that binds promoter
 
 
-    inputs: DBTBS promoter dataframe,
-            boolean indicating whether to save csv
+    inputs
+    DBTBS_promoters_df: DBTBS promoter dataframe,
+    save_csv: boolean indicating whether to save csv
 
-    outputs: dataframe containing matrix of sigma factor x number of promoters
+    outputs
+    Bsubtilis_sigma_factor_occurances: dataframe containing matrix of sigma factor x number of promoters
     """
 
     sigma_factors_Bsubtilis = list(set(DBTBS_promoters_df['sigma factor/motif']))
@@ -306,6 +337,6 @@ def DBTBS_motifs(DBTBS_promoters_df, save_csv=False):
     Bsubtilis_sigma_factor_occurances = Bsubtilis_sigma_factor_occurances.astype('int')
 
     if save_csv:
-        Bsubtilis_sigma_factor_occurances.to_csv("../../data/parsed_promoter_data/20191129_DBTBS_sigma_factor_occurances.csv")
+        Bsubtilis_sigma_factor_occurances.to_csv("../../data/parsed_promoter_data/20191129_DBTBS_sigma_factor_occurances.csv",index=False)
 
     return(Bsubtilis_sigma_factor_occurances)
