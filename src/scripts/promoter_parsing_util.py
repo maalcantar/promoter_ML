@@ -40,6 +40,26 @@ def calc_range(promoter_sequence_df):
 
     return(promoter_sequence_df)
 
+def check_sequence_length(promoter_sequence_df):
+    new_ranges = []
+    for seq, seq_range in zip(list(promoter_sequence_df['DNA sequence']), list(promoter_sequence_df['range (with respect to TSS)'])):
+        seq_range_splt = seq_range.split(' to ')
+
+        if len(seq_range_splt) > 1 and len(seq_range) < 15:
+            # check and update range if needed
+            sequence_length = int(seq_range_splt[1]) - int(seq_range_splt[0])+1
+
+            if len(seq) == sequence_length:
+                new_ranges.append(seq_range)
+            else:
+                new_ranges.append('')
+            test=1
+        else:
+            new_ranges.append(seq_range)
+
+    promoter_sequence_df['range (with respect to TSS)'] = new_ranges
+    return(promoter_sequence_df)
+
 def QC_DNA_sequences(promoter_sequence_df):
 
     """
@@ -91,7 +111,9 @@ def QC_DNA_sequences(promoter_sequence_df):
     # filter rows that don't only contain nucleotide sequence
     promoter_sequence_df = promoter_sequence_df.fillna('').replace('NaN','').replace('ND','').replace('None','')
     promoter_sequence_df = promoter_sequence_df[(~promoter_sequence_df['DNA sequence'].str.contains('[^atcg]')) & (promoter_sequence_df['DNA sequence'].str.len() > 0)]
+    promoter_sequence_df = check_sequence_length(promoter_sequence_df)
     promoter_sequence_df.reset_index()
+
     new_sequence_number = promoter_sequence_df.shape[0]
 
     # display number of filtered sequences

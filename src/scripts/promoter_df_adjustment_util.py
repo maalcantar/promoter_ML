@@ -77,7 +77,7 @@ def trim_promter_seq(promoter_df, new_range, dataset_to_trim):
             new_range_list.append(str(new_range[0]) + ' to ' + '+'+str(new_range[1]))
 
     promoter_df_to_trim['DNA sequence'] = new_sequence_list
-    promoter_df_to_trim['range (with respect to TSS)'] = new_range_list #str(new_range[0]) + ' to ' + '+'+str(new_range[1])
+    promoter_df_to_trim['range (with respect to TSS)'] = new_range_list
 
     promoter_df = pd.concat([promoter_df_to_trim,
            promoter_df_not_to_trim],
