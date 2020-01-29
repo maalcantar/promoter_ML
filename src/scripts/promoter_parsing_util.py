@@ -136,7 +136,6 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
 
     # standardize column names and add new columns, as needed
     if promoter_df_or_type.lower() == 'regulondb':
-
         promoter_sequence_df_columns_dict = dict(zip(list(promoter_sequence_df.columns), newregulonDB_columns_list))
         promoter_sequence_df = promoter_sequence_df.rename(columns=promoter_sequence_df_columns_dict)
         promoter_sequence_df['database/source'] = "RegulonDB"
@@ -150,11 +149,11 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
         promoter_sequence_df['organism'] = 'b. subtilis'
         promoter_sequence_df['database/source'] = 'DBTBS'
 
-        # standardize range syntax
+        # standardize range syntax for DBTBS (position before +1 is now 0, as opposed to -1)
         DBTBS_range_list = list(promoter_sequence_df['range (with respect to TSS)'])
         range_new_list = []
-        for range_orig_list in DBTBS_range_list:
-            range_orig_splt = str(range_orig_list).split(':')
+        for range_orig in DBTBS_range_list:
+            range_orig_splt = str(range_orig).split(':')
             if len(range_orig_splt) > 1:
                 if int(range_orig_splt[0]) < 0:
                     range_orig_lower_range = str(int(range_orig_splt[0]) + 1)
@@ -164,7 +163,7 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
                 range_orig_upper_range = range_orig_splt[1]
                 range_new = range_orig_lower_range + ' to ' + range_orig_upper_range
             else:
-                range_new = range_orig_splt
+                range_new = range_orig
             range_new_list.append(range_new)
         # DBTBS_range_list_renamed = [str(seq_range).replace(':', ' to ') for seq_range in DBTBS_range_list]
         # promoter_sequence_df['range (with respect to TSS)'] = DBTBS_range_list_renamed
