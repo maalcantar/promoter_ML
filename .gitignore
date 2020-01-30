@@ -1,4 +1,10 @@
-# Files to ignore (large csv files)
+# Ignore super-large csv files (don't add to lfs)
 
 **/*promoters_all.csv
 promoters_all.csv
+
+**/*EPDnew_promoters_for_ML.csv
+EPDnew_promoters_for_ML.csv
+
+**/*RegulonDB_promoters_for_ML
+RegulonDB_promoters_for_ML

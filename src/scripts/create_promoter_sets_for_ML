@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+Created on Tue Jan 30 11:59:41 2020
+@author: maalcantar
+"""
+
+import os
+import random
+import argparse
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+
+from promoter_df_adjustment_util import *
+from promoter_parsing_util import *
+
+random.seed(777)
+
+def create_promoter_df_for_ml(positive_promoter_df,
+                              negative_permuted_promoter_df,
+                              random_df,
+                              percentage_permuted,
+                              random_idx_start, seed=777):
+
+    """
+    create dataframe cotaining promoter sequences needed for machine learning
+        that is, this dataframe with contain: i) positive promoters ii) negative
+        promomters (that were permuted from positive ones)
+        iii) random negative promoters. For each organism, we will have an equal split of organism and motif
+
+    inputs
+    positive_promoter_df: dataframe containing positive promoter sequences
+    negative_permuted_promoter_df: dataframe containing negative promoters (obtained by permuting positive promoters)
+    random_df: random negative promoter sequences
+    percentage_permuted: percent of permuted promoters that should constitute the negative subset
+    random_idx_start: where to start indexing negative random num_sequences_to_fill
+
+    outputs
+    promoters_for_ML_df: dataframe containing promoters ready for ML (see function description for more detail)
+    random_idx_start: integer indicating the index for the next available random sequence
+
+    """
+    random.seed(777)
+    # specify the number of permuted promoter sequences we want
+    # we will randomly sample this many permuted sequences from the given pool
+    promoters_for_ML = pd.DataFrame()
+    num_sequences_to_fill = list(range(0,positive_promoter_df.shape[0]))
+    num_permuted_promoter = int(round(percentage_permuted * len(num_sequences_to_fill)))
+    num_random_promoter = len(num_sequences_to_fill) - num_permuted_promoter
+    permuted_promoters_to_pull_idx = random.sample(num_sequences_to_fill,num_permuted_promoter)
+
+    # create a dataframe with the selected permuted promoters
+    negative_set_permuted_df = negative_permuted_promoter_df.copy().iloc[permuted_promoters_to_pull_idx,:]
+    random_set_df = random_df.copy().iloc[0:num_random_promoter,:]
+
+    # since we continually sample from the random promoters, we need to keep track
+    # of how many we have used
+    random_idx_start = random_idx_start + num_random_promoter
+
+    # put together real promoters, permuted sequences, and random sequences
+    promoters_for_ML_df = pd.concat([promoters_for_ML,
+           positive_promoter_df,
+           negative_set_permuted_df,
+           random_set_df],
+            sort=False).reset_index().drop('index', axis=1)
+    return(promoters_for_ML_df, random_idx_start)
+
+def main():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', help='percentage of permuted sequences',
+                              default=0.75)
+
+    args = parser.parse_args()
+    percentage_permuted = args.i
+
+    promoters_all_df = pd.read_csv('../../data/promoters_for_ML/promoters_all.csv', low_memory = False).fillna('')
+
+    # separate EPDnew dataframe by real promoter and permuted promoter (for negative set)
+    EPDnew_df = promoters_all_df.copy()[(promoters_all_df['database/source'] == 'EPDnew') |
+                                      (promoters_all_df['database/source'] == 'EPDnew (permuted)')
+                                      ]
+
+    RegulonDB_df = promoters_all_df.copy()[(promoters_all_df['database/source'] == 'RegulonDB') |
+                                      (promoters_all_df['database/source'] == 'RegulonDB (permuted)')
+                                      ]
+
+    # load in random sequences
+    random_df = promoters_all_df.copy()[promoters_all_df['database/source'] == 'random']
+
+    eukaryotic_organisms = set(EPDnew_df['organism'])
+    eukaryotic_motifs = ['Inr-pfa', 'nonInr-pfa','TATA', 'nonTATA'] # set(EPDnew_df['sigma factor/motif'])
+
+    EPDnew_promoters_for_ML_df = pd.DataFrame()
+    random_set_counter = 0
+
+    # for each organism / motif, create dataframe with positive and negative promoter set
+    # we do this for each organism / motif to ensure sequences are equally split up
+    for organism in eukaryotic_organisms:
+        for motif in eukaryotic_motifs:
+            EPDnew_promoter_positive_df = EPDnew_df.copy()[(EPDnew_df['organism'] == organism) &
+                                                            (EPDnew_df['sigma factor/motif'] == motif) &
+                                                            ((EPDnew_df['database/source'] == 'EPDnew'))]
+
+            EPDnew_promoter_negative_permuted_df = EPDnew_df.copy()[(EPDnew_df['organism'] == organism) &
+                                                                    (EPDnew_df['sigma factor/motif'] == motif) &
+                                                            (       (EPDnew_df['database/source'] == 'EPDnew (permuted)'))]
+            EPDnew_promoters_for_ML_temp_df, random_set_counter = create_promoter_df_for_ml(EPDnew_promoter_positive_df,
+                                          EPDnew_promoter_negative_permuted_df,
+                                          random_df,
+                                          percentage_permuted,
+                                          random_set_counter)
+            EPDnew_promoters_for_ML_df = pd.concat([EPDnew_promoters_for_ML_df,
+               EPDnew_promoters_for_ML_temp_df],
+                sort=False).reset_index().drop('index', axis=1)
+
+    # create positive / negative set promoter sataframe for RegulonDB sequences 
+    RegulonDB_promoters_for_ML_df = pd.DataFrame()
+
+    RegulonDB_promoter_positive_df = RegulonDB_df.copy()[RegulonDB_df['database/source'] == 'RegulonDB']
+    RegulonDB_promoter_negative_permuted_df = RegulonDB_df.copy()[RegulonDB_df['database/source'] == 'RegulonDB (permuted)']
+
+    RegulonDB_promoters_for_ML_df, random_set_counter = create_promoter_df_for_ml(RegulonDB_promoter_positive_df,
+                                  RegulonDB_promoter_negative_permuted_df,
+                                  random_df,
+                                  percentage_permuted,
+                                  random_set_counter)
+
+    EPDnew_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/EPDnew_promoters_for_ML.csv')
+    RegulonDB_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/RegulonDB_promoters_for_ML.csv')
+
+main()

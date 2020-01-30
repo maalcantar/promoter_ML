@@ -155,6 +155,6 @@ def main():
                random_sequences_df],
                 sort=False).reset_index().drop('index', axis=1)
 
-    promoters_all_df.to_csv('../../data/parsed_promoter_data/promoters_all.csv')
+    promoters_all_df.to_csv('../../data/promoters_for_ML/promoters_all.csv')
 
 main()
