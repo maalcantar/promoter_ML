@@ -211,7 +211,7 @@ def reorganize_promoter_df_columns(promoter_sequence_df):
     """
 
     columns_to_conserve = ['organism', 'database/source', 'DNA sequence', 'regulated gene',
-                           'range (with respect to TSS)', 'motifs', 'sigma factor/motif', 'inducer/repressor', 'promoter']
+                           'range (with respect to TSS)', 'sigma factor/motif', 'inducer/repressor', 'promoter']
 
     columns_to_add = list(set(columns_to_conserve) - set(promoter_sequence_df.columns))
     columns_to_drop = list(set(promoter_sequence_df.columns) - set(columns_to_conserve))

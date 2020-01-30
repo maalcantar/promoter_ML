@@ -1,0 +1,4 @@
+# Files to ignore (large csv files)
+
+**/*promoters_all.csv
+promoters_all.csv

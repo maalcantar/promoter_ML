@@ -458,6 +458,7 @@ def main():
                inducible_promoters_bact_df_to_concat,
                 inducible_promoters_fungus_df_to_concat],
                 sort=False).reset_index().drop('index', axis=1)
+    promoters_df['class'] = 1
 
     promoters_df.to_csv("../../data/parsed_promoter_data/20191203_promoters.csv",index=False)
 
