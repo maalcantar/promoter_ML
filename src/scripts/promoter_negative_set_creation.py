@@ -99,6 +99,7 @@ def create_permuted_set(promoter_df, number_of_splits, percentage_to_conserve, m
     negative_sequence_df = promoter_df.copy()
     negative_sequence_df['DNA sequence'] = negative_sequences
     negative_sequence_df['class'] = 0
+    negative_sequence_df['database/source'] = list(negative_sequence_df['database/source'])[0] +' (permuted)'
     return(negative_sequence_df)
 
 
