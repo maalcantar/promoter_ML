@@ -119,10 +119,12 @@ def generate_random_sequence(num_sequences, sequence_length, seed=777):
     bases = ['a', 'c', 't', 'g']
     random_sequences = []
 
-    for idx in range(0,num_sequences):
+    # create extra sequences than desired in case there is any redundancy
+    # (though that is extremely unlikely)
+    for idx in range(0,round(num_sequences*1.2)):
         random_sequence = [random.choice(bases) for _ in range(sequence_length)]
         random_sequences.append(''.join(random_sequence))
-    random_sequences_final = list(set(random_sequences[:]))
+    random_sequences_final = list(set(random_sequences[0:num_sequences]))
     random_sequences_df = pd.DataFrame()
     random_sequences_df['DNA sequence'] = random_sequences_final
     random_sequences_df['database/source'] = 'random'
@@ -136,9 +138,9 @@ def main():
     parser = argparse.ArgumentParser()
 
     promoter_df = pd.read_csv('../../data/parsed_promoter_data/20191203_promoters.csv',low_memory=False).fillna('')
-    promoter_df = trim_promter_seq(promoter_df, [-249,50], 'EPDnew')
+    # promoter_df = trim_promter_seq(promoter_df, [-249,50], 'EPDnew')
     promoter_df = trim_promter_seq(promoter_df, [-59,20], 'RegulonDB')
-
+    num_promoter_sequences = int(promoter_df.shape[0])
     EPDnew_promoters_df = promoter_df.copy()
     EPDnew_promoters_df = EPDnew_promoters_df[EPDnew_promoters_df['database/source'] == 'EPDnew']
     EPDnew_negative_promoters_df = create_permuted_set(EPDnew_promoters_df, 20, 0.4, 0.2, seed=777)
@@ -147,7 +149,7 @@ def main():
     RegulonDB_promoters_df = RegulonDB_promoters_df[RegulonDB_promoters_df['database/source'] == 'RegulonDB']
     RegulonDB_negative_promoters_df = create_permuted_set(RegulonDB_promoters_df, 8, 0.4, 0.2, seed=777)
 
-    random_sequences_df = generate_random_sequence(150000,300)
+    random_sequences_df = generate_random_sequence(num_promoter_sequences,600)
 
     promoters_all_df = pd.concat([promoter_df,
                EPDnew_negative_promoters_df,
