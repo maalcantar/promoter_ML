@@ -97,7 +97,7 @@ def QC_DNA_sequences(promoter_sequence_df):
     sequences = [str(seq).strip('\n') for seq in sequences] # remove edge '\n'
     sequences = [seq.replace('\n','') for seq in sequences] # remove other '\n'
     sequences = [seq.replace(' ','') for seq in sequences] # remove empty spaces
-    sequences = [seq.lower() for seq in sequences] # convert sequences to lowercase
+    sequences = [seq.upper() for seq in sequences] # convert sequences to upercase
     sequences = [seq.replace('{', '').replace('}', '') for seq in sequences]
 
     promoter_sequence_df['DNA sequence'] = sequences
@@ -110,7 +110,7 @@ def QC_DNA_sequences(promoter_sequence_df):
 
     # filter rows that don't only contain nucleotide sequence
     promoter_sequence_df = promoter_sequence_df.fillna('').replace('NaN','').replace('ND','').replace('None','')
-    promoter_sequence_df = promoter_sequence_df[(~promoter_sequence_df['DNA sequence'].str.contains('[^atcg]')) & (promoter_sequence_df['DNA sequence'].str.len() > 0)]
+    promoter_sequence_df = promoter_sequence_df[(~promoter_sequence_df['DNA sequence'].str.contains('[^ATCG]')) & (promoter_sequence_df['DNA sequence'].str.len() > 0)]
     promoter_sequence_df = check_sequence_length(promoter_sequence_df)
     promoter_sequence_df.reset_index()
 
