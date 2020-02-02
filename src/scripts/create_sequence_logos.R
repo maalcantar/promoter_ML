@@ -62,7 +62,7 @@ for (sigma_factor in sigma_factors_Ecoli) {
   # RegulonDB_promoters_neg_random_seq <- sapply(RegulonDB_promoters_neg_random_seq,substr, start=20, stop=62)
   
   # plot sequence logos
-  pos_logo <- ggseqlogo( RegulonDB_promoters_pos_seq, font = 'roboto_bold',col_scheme=color_scheme )  + scale_x_continuous(breaks = Reg_length,labels = Reg_change )+ ylim(0, 2)
+  pos_logo <- ggseqlogo( RegulonDB_promoters_pos_seq, font = 'roboto_bold',col_scheme=color_scheme )  + scale_x_continuous(breaks = orig_idx,labels = new_idx )+ ylim(0, 2)
   neg_perm_logo <- ggseqlogo( RegulonDB_promoters_neg_perm_seq, font = 'roboto_bold',col_scheme=color_scheme ) + scale_x_continuous(breaks = orig_idx,labels = new_idx )+ ylim(0, 2)
   # neg_rand_logo <- ggseqlogo( RegulonDB_promoters_neg_random_seq, font = 'roboto_bold',col_scheme=color_scheme )+ scale_x_continuous(breaks = c(10, 20)) + ylim(0, 2)
   final_plot <- gridExtra::grid.arrange(pos_logo, neg_perm_logo) 
@@ -120,8 +120,8 @@ for (motif in motifs_EPDnew) {
     EPDnew_promoters_neg_perm_seq <- sapply(EPDnew_promoters_neg_perm_seq, substr, start=460, stop=502)
 
     # plot sequence logos
-    pos_logo <- ggseqlogo( EPDnew_promoters_pos_seq, font = 'roboto_bold',col_scheme=color_scheme )  + scale_x_continuous(breaks = Reg_length,labels = Reg_change )+ ylim(0, 2)
-    neg_perm_logo <- ggseqlogo( EPDnew_promoters_neg_perm_seq, font = 'roboto_bold',col_scheme=color_scheme ) + scale_x_continuous(breaks = Reg_length,labels = Reg_change )+ ylim(0, 2)
+    pos_logo <- ggseqlogo( EPDnew_promoters_pos_seq, font = 'roboto_bold',col_scheme=color_scheme )  + scale_x_continuous(breaks = orig_idx,labels = new_idx )+ ylim(0, 2)
+    neg_perm_logo <- ggseqlogo( EPDnew_promoters_neg_perm_seq, font = 'roboto_bold',col_scheme=color_scheme ) + scale_x_continuous(breaks = orig_idx,labels = new_idx )+ ylim(0, 2)
 
     final_plot <- gridExtra::grid.arrange(pos_logo, neg_perm_logo) 
     plot_name <- paste('EPDnew', organism, motif,sep='_')
@@ -141,3 +141,5 @@ for (motif in motifs_EPDnew) {
            dpi = 400)
     }
 }
+
+

@@ -28,7 +28,7 @@ def mutate_sequence(sequence, mutation_rate, seed = 777):
     mutation_rate: float indicating desired mutation rate (should be values between 0 and 1)
     """
     random.seed(seed)
-    bases = 'actg'
+    bases = 'ACTG'
     new_sequence = []
     for base in sequence:
         if random.random() < mutation_rate:
