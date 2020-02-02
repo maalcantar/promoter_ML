@@ -8,3 +8,6 @@ EPDnew_promoters_for_ML.csv
 
 **/*RegulonDB_promoters_for_ML
 RegulonDB_promoters_for_ML
+
+**/*.csv
+*.csv
