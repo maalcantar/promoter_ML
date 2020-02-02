@@ -116,7 +116,7 @@ def generate_random_sequence(num_sequences, sequence_length, seed=777):
     sequences: list of random sequences
     """
     random.seed(seed)
-    bases = ['a', 'c', 't', 'g']
+    bases = ['A', 'C', 'T', 'G']
     random_sequences = []
 
     # create extra sequences than desired in case there is any redundancy
@@ -157,6 +157,6 @@ def main():
                random_sequences_df],
                 sort=False).reset_index().drop('index', axis=1)
 
-    promoters_all_df.to_csv('../../data/promoters_for_ML/promoters_all.csv')
+    promoters_all_df.to_csv('../../data/promoters_for_ML/promoters_all.csv', index=False)
 
 main()

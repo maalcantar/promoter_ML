@@ -143,7 +143,8 @@ def plot_EPDnew_data(motifs_occurances_df, save_plot=False):
     motifs_occurances_df: dataframe containing EPDnew organisms x motifs (the output of EPDnew_motifs function)
     save_plot: boolean indicating whether plot should be saved
 
-    # outputs: if save_plot, then a bar plot is saved
+    # outputs
+    if save_plot, then a bar plot is saved
     """
 
     dark_blue = '#4D98FA'

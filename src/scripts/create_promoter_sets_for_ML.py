@@ -21,7 +21,7 @@ random.seed(777)
 def create_promoter_df_for_ml(positive_promoter_df,
                               negative_permuted_promoter_df,
                               random_df,
-                              percentage_permuted,
+                              #percentage_permuted,
                               random_idx_start, seed=777):
 
     """
@@ -34,8 +34,9 @@ def create_promoter_df_for_ml(positive_promoter_df,
     positive_promoter_df: dataframe containing positive promoter sequences
     negative_permuted_promoter_df: dataframe containing negative promoters (obtained by permuting positive promoters)
     random_df: random negative promoter sequences
-    percentage_permuted: percent of permuted promoters that should constitute the negative subset
     random_idx_start: where to start indexing negative random num_sequences_to_fill
+
+    taken out: percentage_permuted: percent of permuted promoters that should constitute the negative subset
 
     outputs
     promoters_for_ML_df: dataframe containing promoters ready for ML (see function description for more detail)
@@ -47,17 +48,18 @@ def create_promoter_df_for_ml(positive_promoter_df,
     # we will randomly sample this many permuted sequences from the given pool
     promoters_for_ML = pd.DataFrame()
     num_sequences_to_fill = list(range(0,positive_promoter_df.shape[0]))
-    num_permuted_promoter = int(round(percentage_permuted * len(num_sequences_to_fill)))
-    num_random_promoter = len(num_sequences_to_fill) - num_permuted_promoter
-    permuted_promoters_to_pull_idx = random.sample(num_sequences_to_fill,num_permuted_promoter)
+    num_sequences = len(num_sequences_to_fill)
+    # num_permuted_promoter = int(round(percentage_permuted * len(num_sequences_to_fill)))
+    # num_random_promoter = len(num_sequences_to_fill) - num_permuted_promoter
+    # permuted_promoters_to_pull_idx = random.sample(num_sequences_to_fill,num_permuted_promoter)
 
     # create a dataframe with the selected permuted promoters
-    negative_set_permuted_df = negative_permuted_promoter_df.copy().iloc[permuted_promoters_to_pull_idx,:]
-    random_set_df = random_df.copy().iloc[0:num_random_promoter,:]
+    negative_set_permuted_df = negative_permuted_promoter_df.copy()#.iloc[permuted_promoters_to_pull_idx,:]
+    random_set_df = random_df.copy().iloc[0:num_sequences,:]
 
     # since we continually sample from the random promoters, we need to keep track
     # of how many we have used
-    random_idx_start = random_idx_start + num_random_promoter
+    random_idx_start = random_idx_start + num_sequences#num_random_promoter
 
     # put together real promoters, permuted sequences, and random sequences
     promoters_for_ML_df = pd.concat([promoters_for_ML,
@@ -69,12 +71,12 @@ def create_promoter_df_for_ml(positive_promoter_df,
 
 def main():
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-i', help='percentage of permuted sequences',
-                              default=0.75)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('-i', help='percentage of permuted sequences',
+    #                           default=0.75)
 
-    args = parser.parse_args()
-    percentage_permuted = args.i
+    # args = parser.parse_args()
+    # percentage_permuted = args.i
 
     promoters_all_df = pd.read_csv('../../data/promoters_for_ML/promoters_all.csv', low_memory = False).fillna('')
 
@@ -110,25 +112,31 @@ def main():
             EPDnew_promoters_for_ML_temp_df, random_set_counter = create_promoter_df_for_ml(EPDnew_promoter_positive_df,
                                           EPDnew_promoter_negative_permuted_df,
                                           random_df,
-                                          percentage_permuted,
+                                          # percentage_permuted,
                                           random_set_counter)
             EPDnew_promoters_for_ML_df = pd.concat([EPDnew_promoters_for_ML_df,
                EPDnew_promoters_for_ML_temp_df],
                 sort=False).reset_index().drop('index', axis=1)
 
-    # create positive / negative set promoter sataframe for RegulonDB sequences 
+    # create positive / negative set promoter sataframe for RegulonDB sequences
     RegulonDB_promoters_for_ML_df = pd.DataFrame()
 
     RegulonDB_promoter_positive_df = RegulonDB_df.copy()[RegulonDB_df['database/source'] == 'RegulonDB']
     RegulonDB_promoter_negative_permuted_df = RegulonDB_df.copy()[RegulonDB_df['database/source'] == 'RegulonDB (permuted)']
 
+    # trim random sequences to 80bp such that they are comptabile with RegulonDB
+    num_RegulonSB_sequences = RegulonDB_promoter_positive_df.shape[0]
+    random_df_RegulonDB = random_df.copy().iloc[random_set_counter:random_set_counter+num_RegulonSB_sequences,:]
+    random_seq_RegulonDB_list = list(random_df_RegulonDB['DNA sequence'])
+    random_seq_RegulonDB_trimmed = [random_seq[0:80] for random_seq in random_seq_RegulonDB_list]
+    random_df_RegulonDB['DNA sequence'] = random_seq_RegulonDB_trimmed
     RegulonDB_promoters_for_ML_df, random_set_counter = create_promoter_df_for_ml(RegulonDB_promoter_positive_df,
                                   RegulonDB_promoter_negative_permuted_df,
-                                  random_df,
-                                  percentage_permuted,
+                                  random_df_RegulonDB,
+                                  # percentage_permuted,
                                   random_set_counter)
 
-    EPDnew_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/EPDnew_promoters_for_ML.csv')
-    RegulonDB_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/RegulonDB_promoters_for_ML.csv')
+    EPDnew_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/EPDnew_promoters_for_ML.csv', index=False)
+    RegulonDB_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/RegulonDB_promoters_for_ML.csv', index=False)
 
 main()

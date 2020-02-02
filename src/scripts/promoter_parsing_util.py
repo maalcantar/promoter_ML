@@ -144,8 +144,8 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
                                 "location of TSS on genome",
                                 "sigma factor/motif",
                                 "DNA sequence",
-                                "evidence",
-                                "evidence confidence"]
+                                "experimental evidence",
+                                "confidence"]
 
     # standardized column names for DBTBS dataframe
     newDBTBS_columns_list = ['operon',
@@ -153,7 +153,7 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
                              'absolute position',
                              'range (with respect to TSS)',
                              'DNA sequence',
-                             'experimental evidence',
+                             'evidence',
                              'sigma factor/motif']
 
     # standardize column names and add new columns, as needed
@@ -211,7 +211,7 @@ def reorganize_promoter_df_columns(promoter_sequence_df):
     """
 
     columns_to_conserve = ['organism', 'database/source', 'DNA sequence', 'regulated gene',
-                           'range (with respect to TSS)', 'sigma factor/motif', 'inducer/repressor', 'promoter']
+                           'range (with respect to TSS)', 'sigma factor/motif', 'inducer/repressor', 'promoter', 'confidence']
 
     columns_to_add = list(set(columns_to_conserve) - set(promoter_sequence_df.columns))
     columns_to_drop = list(set(promoter_sequence_df.columns) - set(columns_to_conserve))
