@@ -16,9 +16,10 @@ from matplotlib import pyplot as plt
 from promoter_df_adjustment_util import *
 from promoter_parsing_util import *
 
-random.seed(777)
+## REMOVESEED ##
+# random.seed(777)
 
-def mutate_sequence(sequence, mutation_rate, seed = 777):
+def mutate_sequence(sequence, mutation_rate, seed):
 
     """
     mutate nucleotides in a given sequence
@@ -28,9 +29,9 @@ def mutate_sequence(sequence, mutation_rate, seed = 777):
     mutation_rate: float indicating desired mutation rate (should be values between 0 and 1)
     """
     random.seed(seed)
-    bases = 'ACTG'
     new_sequence = []
     for base in sequence:
+        bases = 'ACTG'
         if random.random() < mutation_rate:
             new_base = bases.strip(base)[random.randint(0, 2)]
             new_sequence.append(new_base)
@@ -54,12 +55,13 @@ def create_permuted_set(promoter_df, number_of_splits, percentage_to_conserve, m
     negative_promoter_set: dataframe containing negative promoter set
 
     """
-    random.seed(seed)
+    ## REMOVESEED ##
+    # random.seed(seed)
     promoter_sequences = promoter_df['DNA sequence']
     negative_sequences = []
 
     for sequence in promoter_sequences:
-
+        random.seed(seed)
         # define length of nucleotide segments
         seq_length = int(len(sequence))
         segements_length = int(seq_length / number_of_splits)
@@ -80,9 +82,12 @@ def create_permuted_set(promoter_df, number_of_splits, percentage_to_conserve, m
 
         # permute segments
         random.shuffle(permuted_segments)
-
+        permuted_segments_temp = permuted_segments
+        permuted_segments = []
         # mutate permuted segmenes
-        permuted_segments = [mutate_sequence(segment, mutation_rate, seed) for segment in permuted_segments]
+        for segment in permuted_segments_temp:
+            permuted_segments.append(mutate_sequence(segment, mutation_rate, seed))
+            seed = seed+1
 
         # place segments back into sequence
         mutated_permuted_sequence = [None] * len(sequence_segments)
@@ -100,10 +105,10 @@ def create_permuted_set(promoter_df, number_of_splits, percentage_to_conserve, m
     negative_sequence_df['DNA sequence'] = negative_sequences
     negative_sequence_df['class'] = 0
     negative_sequence_df['database/source'] = list(negative_sequence_df['database/source'])[0] +' (permuted)'
-    return(negative_sequence_df)
+    return(negative_sequence_df,seed)
 
 
-def generate_random_sequence(num_sequences, sequence_length, seed=777):
+def generate_random_sequence(num_sequences, sequence_length, seed):
 
     """
     generates a specified number of random sequences
@@ -136,6 +141,7 @@ def generate_random_sequence(num_sequences, sequence_length, seed=777):
 
 def main():
     parser = argparse.ArgumentParser()
+    seed=777
 
     promoter_df = pd.read_csv('../../data/parsed_promoter_data/20191203_promoters.csv',low_memory=False).fillna('')
     # promoter_df = trim_promter_seq(promoter_df, [-249,50], 'EPDnew')
@@ -143,13 +149,13 @@ def main():
     num_promoter_sequences = int(promoter_df.shape[0])
     EPDnew_promoters_df = promoter_df.copy()
     EPDnew_promoters_df = EPDnew_promoters_df[EPDnew_promoters_df['database/source'] == 'EPDnew']
-    EPDnew_negative_promoters_df = create_permuted_set(EPDnew_promoters_df, 20, 0.4, 0.2, seed=777)
+    EPDnew_negative_promoters_df,seed = create_permuted_set(EPDnew_promoters_df, 20, 0.4, 0.2, seed)
 
     RegulonDB_promoters_df = promoter_df.copy()
     RegulonDB_promoters_df = RegulonDB_promoters_df[RegulonDB_promoters_df['database/source'] == 'RegulonDB']
-    RegulonDB_negative_promoters_df = create_permuted_set(RegulonDB_promoters_df, 8, 0.4, 0.2, seed=777)
+    RegulonDB_negative_promoters_df,seed = create_permuted_set(RegulonDB_promoters_df, 8, 0.4, 0.2, seed)
 
-    random_sequences_df = generate_random_sequence(num_promoter_sequences,600)
+    random_sequences_df = generate_random_sequence(num_promoter_sequences,600,seed)
 
     promoters_all_df = pd.concat([promoter_df,
                EPDnew_negative_promoters_df,
