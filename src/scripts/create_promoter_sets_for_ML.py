@@ -49,9 +49,6 @@ def create_promoter_df_for_ml(positive_promoter_df,
     promoters_for_ML = pd.DataFrame()
     num_sequences_to_fill = list(range(0,positive_promoter_df.shape[0]))
     num_sequences = len(num_sequences_to_fill)
-    # num_permuted_promoter = int(round(percentage_permuted * len(num_sequences_to_fill)))
-    # num_random_promoter = len(num_sequences_to_fill) - num_permuted_promoter
-    # permuted_promoters_to_pull_idx = random.sample(num_sequences_to_fill,num_permuted_promoter)
 
     # create a dataframe with the selected permuted promoters
     negative_set_permuted_df = negative_permuted_promoter_df.copy()#.iloc[permuted_promoters_to_pull_idx,:]
@@ -69,14 +66,37 @@ def create_promoter_df_for_ml(positive_promoter_df,
             sort=False).reset_index().drop('index', axis=1)
     return(promoters_for_ML_df, random_idx_start)
 
+def concat_intragenic_region(prom_df, prom_for_ML, organism_name):
+
+    """
+    concatenate intragenic regions with positive and negative promoter sets for specified organism_motifs_dict
+
+    inputs
+    prom_df: original containing only positive promoter sequences
+    prom_for_ML: dataset with positive and negative promoter num_sequences
+    organism_name: character string indicating organism whose intragenic regions
+    are being concatenated. Currently supported inputs are: human, athaliana, ecoli_intragenic_seq_df
+
+    output
+    prom_for_ML: dataframe with new intragenic regions concatenated to positive
+    and negative promoter sequences
+    """
+
+    genome_transcrips_file = '../../data/parsed_genome_transcripts/' + organism_name + '_transcriptome_trimmed.csv'
+    intragenic_seq_df = pd.read_csv(genome_transcrips_file)
+    organism_name_in_df = list(intragenic_seq_df['organism'])[0]
+
+    prom_seq_num = prom_df.copy()[(prom_df['organism'] == organism_name_in_df)].shape[0]
+    num_intra_seqs = intragenic_seq_df.shape[0]
+    random_indices = random.sample(range(0, num_intra_seqs), prom_seq_num)
+    intragenic_seq_df = intragenic_seq_df.copy().iloc[random_indices,:]
+    prom_for_ML = pd.concat([prom_for_ML,
+       intragenic_seq_df],
+        sort=False).reset_index().drop('index', axis=1)
+
+    return(prom_for_ML)
+
 def main():
-
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument('-i', help='percentage of permuted sequences',
-    #                           default=0.75)
-
-    # args = parser.parse_args()
-    # percentage_permuted = args.i
 
     promoters_all_df = pd.read_csv('../../data/promoters_for_ML/promoters_all.csv', low_memory = False).fillna('')
 
@@ -120,14 +140,21 @@ def main():
                EPDnew_promoters_for_ML_temp_df],
                 sort=False).reset_index().drop('index', axis=1)
   # intragenic sequences
-    human_prom_seq_num = EPDnew_df.copy()[(EPDnew_df['organism'] == 'h_sapien')].shape[0]
-    human_intragenic_seq_df = pd.read_csv('../../data/parsed_genome_transcripts/human_transcriptome_trimmed.csv')
-    num_intra_seqs = human_intragenic_seq_df.shape[0]
-    random_indices = random.sample(range(0, num_intra_seqs), human_prom_seq_num)
-    human_intragenic_seq_df = human_intragenic_seq_df.copy().iloc[random_indices,:]
-    EPDnew_promoters_for_ML_df = pd.concat([EPDnew_promoters_for_ML_df,
-       human_intragenic_seq_df],
-        sort=False).reset_index().drop('index', axis=1)
+    # human_prom_seq_num = EPDnew_df.copy()[(EPDnew_df['organism'] == 'h_sapien')].shape[0]
+    # human_intragenic_seq_df = pd.read_csv('../../data/parsed_genome_transcripts/human_transcriptome_trimmed.csv')
+    # num_intra_seqs = human_intragenic_seq_df.shape[0]
+    # random_indices = random.sample(range(0, num_intra_seqs), human_prom_seq_num)
+    # human_intragenic_seq_df = human_intragenic_seq_df.copy().iloc[random_indices,:]
+    # EPDnew_promoters_for_ML_df = pd.concat([EPDnew_promoters_for_ML_df,
+    #    human_intragenic_seq_df],
+    #     sort=False).reset_index().drop('index', axis=1)
+    EPDnew_promoters_for_ML_df = concat_intragenic_region(EPDnew_df,
+                                                          EPDnew_promoters_for_ML_df,
+                                                          organism_name='human')
+    EPDnew_promoters_for_ML_df = concat_intragenic_region(EPDnew_df,
+                                                          EPDnew_promoters_for_ML_df,
+                                                          organism_name='athaliana')
+
     # create positive / negative set promoter sataframe for RegulonDB sequences
     RegulonDB_promoters_for_ML_df = pd.DataFrame()
 
@@ -141,20 +168,25 @@ def main():
     random_seq_RegulonDB_trimmed = [random_seq[0:80] for random_seq in random_seq_RegulonDB_list]
     random_df_RegulonDB['DNA sequence'] = random_seq_RegulonDB_trimmed
 
-    ecoli_intragenic_seq_df = pd.read_csv('../../data/parsed_genome_transcripts/ecoli_transcriptome_trimmed.csv')
-    num_intra_seqs = ecoli_intragenic_seq_df.shape[0]
-    random_indices = random.sample(range(0, num_intra_seqs), num_RegulonSB_sequences)
-    ecoli_intragenic_seq_df = ecoli_intragenic_seq_df.copy().iloc[random_indices,:]
+    # intragenic regions
+    # ecoli_intragenic_seq_df = pd.read_csv('../../data/parsed_genome_transcripts/ecoli_transcriptome_trimmed.csv')
+    # num_intra_seqs = ecoli_intragenic_seq_df.shape[0]
+    # random_indices = random.sample(range(0, num_intra_seqs), num_RegulonSB_sequences)
+    # ecoli_intragenic_seq_df = ecoli_intragenic_seq_df.copy().iloc[random_indices,:]
+    #
+    # RegulonDB_promoters_for_ML_df, random_set_counter = create_promoter_df_for_ml(RegulonDB_promoter_positive_df,
+    #                               RegulonDB_promoter_negative_permuted_df,
+    #                               random_df_RegulonDB,
+    #                               # percentage_permuted,
+    #                               random_set_counter,'e_coli')
 
-    RegulonDB_promoters_for_ML_df, random_set_counter = create_promoter_df_for_ml(RegulonDB_promoter_positive_df,
-                                  RegulonDB_promoter_negative_permuted_df,
-                                  random_df_RegulonDB,
-                                  # percentage_permuted,
-                                  random_set_counter,'e_coli')
+    RegulonDB_promoters_for_ML_df = concat_intragenic_region(RegulonDB_promoter_positive_df,
+                                                              RegulonDB_promoters_for_ML_df,
+                                                              organism_name='ecoli')
 
-    RegulonDB_promoters_for_ML_df = pd.concat([RegulonDB_promoters_for_ML_df,
-        ecoli_intragenic_seq_df],
-         sort=False).reset_index().drop('index', axis=1)
+    # RegulonDB_promoters_for_ML_df = pd.concat([RegulonDB_promoters_for_ML_df,
+    #     ecoli_intragenic_seq_df],
+    #      sort=False).reset_index().drop('index', axis=1)
 
     EPDnew_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/EPDnew_promoters_for_ML.csv', index=False)
     RegulonDB_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/RegulonDB_promoters_for_ML.csv', index=False)
