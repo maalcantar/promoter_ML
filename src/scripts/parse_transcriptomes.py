@@ -158,6 +158,7 @@ def parse_ecoli_transcriptome(save_csv = True):
                     'database/source': ['e_coli genes (RegulonDB)']*len(origin_gene)
                     }
     ecoli_gene_sequences_trimmed_df = pd.DataFrame(trimmed_ecoli_dict)
+    ecoli_gene_sequences_trimmed_df['organism'] = "e_coli"
     ecoli_gene_sequences_trimmed_df = reorganize_promoter_df_columns(ecoli_gene_sequences_trimmed_df)
     ecoli_gene_sequences_trimmed_df = QC_DNA_sequences(ecoli_gene_sequences_trimmed_df)
     ecoli_gene_sequences_trimmed_df['class'] = 0

@@ -12,6 +12,9 @@ RegulonDB_promoters_for_ML
 **/*.csv
 *.csv
 
+**/*.txt
+*.txt
+
 **/*GRCh38_latest_rna.txt
 *GRCh38_latest_rna.txt
 
