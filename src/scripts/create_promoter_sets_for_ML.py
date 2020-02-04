@@ -114,10 +114,20 @@ def main():
                                           random_df,
                                           # percentage_permuted,
                                           random_set_counter)
+
+
             EPDnew_promoters_for_ML_df = pd.concat([EPDnew_promoters_for_ML_df,
                EPDnew_promoters_for_ML_temp_df],
                 sort=False).reset_index().drop('index', axis=1)
-
+  # intragenic sequences
+    human_prom_seq_num = EPDnew_df.copy()[(EPDnew_df['organism'] == 'h_sapien')].shape[0]
+    human_intragenic_seq_df = pd.read_csv('../../data/parsed_genome_transcripts/human_transcriptome_trimmed.csv')
+    num_intra_seqs = human_intragenic_seq_df.shape[0]
+    random_indices = random.sample(range(0, num_intra_seqs), human_prom_seq_num)
+    human_intragenic_seq_df = human_intragenic_seq_df.copy().iloc[random_indices,:]
+    EPDnew_promoters_for_ML_df = pd.concat([EPDnew_promoters_for_ML_df,
+       human_intragenic_seq_df],
+        sort=False).reset_index().drop('index', axis=1)
     # create positive / negative set promoter sataframe for RegulonDB sequences
     RegulonDB_promoters_for_ML_df = pd.DataFrame()
 
