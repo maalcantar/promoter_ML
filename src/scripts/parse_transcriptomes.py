@@ -103,6 +103,70 @@ def parse_human_transcriptome(save_csv = True):
         human_transcriptome_df.to_csv('../../data/parsed_genome_transcripts/human_transcriptome.csv', index=False)
         human_transcriptome_trimmed_df.to_csv('../../data/parsed_genome_transcripts/human_transcriptome_trimmed.csv', index=False)
 
+def parse_ecoli_transcriptome(save_csv = True):
+
+    """
+    create a dataframe containing nucleotide sequences from e coli gene sequences
+
+    inputs:
+    save_csv: boolean indicating whether csv files should be saved
+
+    outputs:
+    None
+    """
+    # Download regulon DB promoter database and organize dataframe
+    ecoli_gene_sequences_df = pd.read_csv('../../data/genome_transcripts/e_coli_Gene_sequence.csv', header=40)
+    new_columns_list = ["RegulonDB ID",
+                    "regulated gene",
+                    "gene left end position in the genome",
+                    "gene right end position in the genome",
+                    "DNA strand where the gene is coded",
+                    "product type",
+                    "product name",
+                    "start codon sequence",
+                    "stop codon sequence",
+                    "DNA sequence",
+                    "all bnumber related to gene",
+                    "other databases id  related to gene",
+                    "other databases id  related to gene (2)"]
+    old_columns_list = list(ecoli_gene_sequences_df.columns)
+    reindex_dict = dict(zip(old_columns_list, new_columns_list))
+    ecoli_gene_sequences_df = ecoli_gene_sequences_df.rename(columns=reindex_dict)
+    ecoli_gene_sequences_df = ecoli_gene_sequences_df.fillna('')
+    ecoli_gene_sequences_df = ecoli_gene_sequences_df[~ecoli_gene_sequences_df['product name'].str.contains('putative')]
+    ecoli_gene_sequences_df = ecoli_gene_sequences_df[["DNA sequence", 'regulated gene']]
+    ecoli_gene_sequences_df['database/source'] = ['e_coli genes (RegulonDB)'] * ecoli_gene_sequences_df.shape[0]
+    ecoli_gene_sequences_df['organism'] = 'e_coli'
+    ecoli_gene_sequences_df = reorganize_promoter_df_columns(ecoli_gene_sequences_df)
+
+    ecoli_gene_sequences_df = QC_DNA_sequences(ecoli_gene_sequences_df)
+    ecoli_gene_sequences_df = ecoli_gene_sequences_df[ecoli_gene_sequences_df['DNA sequence'].str.len() > 160]
+    ecoli_gene_sequences_df = ecoli_gene_sequences_df.reset_index()
+    ecoli_gene_sequences_df['class'] = 0
+
+    final_seq_len = 80
+    new_trimmed_seqs = []
+    origin_gene = []
+    for seq, gene in zip(ecoli_gene_sequences_df['DNA sequence'],ecoli_gene_sequences_df['regulated gene']) :
+        num_iterations = int(np.floor(len(seq)/final_seq_len))
+        for num_iter in range(0,num_iterations):
+            new_trimmed_seqs.append(seq[final_seq_len*num_iter:(num_iter+1)*final_seq_len])
+            origin_gene.append(gene)
+    trimmed_ecoli_dict = {
+                    'DNA sequence': new_trimmed_seqs,
+                    'regulated gene': origin_gene,
+                    'database/source': ['e_coli genes (RegulonDB)']*len(origin_gene)
+                    }
+    ecoli_gene_sequences_trimmed_df = pd.DataFrame(trimmed_ecoli_dict)
+    ecoli_gene_sequences_trimmed_df = reorganize_promoter_df_columns(ecoli_gene_sequences_trimmed_df)
+    ecoli_gene_sequences_trimmed_df = QC_DNA_sequences(ecoli_gene_sequences_trimmed_df)
+    ecoli_gene_sequences_trimmed_df['class'] = 0
+
+    if save_csv:
+        ecoli_gene_sequences_df.to_csv('../../data/parsed_genome_transcripts/ecoli_transcriptome.csv', index=False)
+        ecoli_gene_sequences_trimmed_df.to_csv('../../data/parsed_genome_transcripts/ecoli_transcriptome_trimmed.csv', index=False)
+
 def main():
     parse_human_transcriptome(save_csv = True)
+    parse_ecoli_transcriptome(save_csv = True)
 main()

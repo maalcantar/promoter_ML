@@ -90,7 +90,7 @@ def QC_DNA_sequences(promoter_sequence_df):
     elif list(promoter_sequence_df['database/source'])[0] == 'Meyer et al 2019 (PMID: 30478458)':
         db = 'bacterial inducible promoters'
     else:
-        db = 'fungal inducible promoters'
+        db = 'other'
 
     # remove unwanted characters from DNA sequences
     sequences = list(promoter_sequence_df['DNA sequence'])
@@ -191,6 +191,8 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
         # promoter_sequence_df['range (with respect to TSS)'] = DBTBS_range_list_renamed
 
         promoter_sequence_df['range (with respect to TSS)'] = range_new_list
+    elif promoter_df_or_type.lower() == 'other':
+        accept = 'accept'
     else:
         print('Error! Please enter a valid promoter dataframe or type: \'RegulonDB\' or \'DBTBS\'')
 

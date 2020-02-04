@@ -22,7 +22,7 @@ def create_promoter_df_for_ml(positive_promoter_df,
                               negative_permuted_promoter_df,
                               random_df,
                               #percentage_permuted,
-                              random_idx_start, seed=777):
+                              random_idx_start,organism, seed=777):
 
     """
     create dataframe cotaining promoter sequences needed for machine learning
@@ -56,7 +56,7 @@ def create_promoter_df_for_ml(positive_promoter_df,
     # create a dataframe with the selected permuted promoters
     negative_set_permuted_df = negative_permuted_promoter_df.copy()#.iloc[permuted_promoters_to_pull_idx,:]
     random_set_df = random_df.copy().iloc[0:num_sequences,:]
-
+    random_set_df['organism'] = [organism] * num_sequences
     # since we continually sample from the random promoters, we need to keep track
     # of how many we have used
     random_idx_start = random_idx_start + num_sequences#num_random_promoter
@@ -113,7 +113,7 @@ def main():
                                           EPDnew_promoter_negative_permuted_df,
                                           random_df,
                                           # percentage_permuted,
-                                          random_set_counter)
+                                          random_set_counter,organism)
 
 
             EPDnew_promoters_for_ML_df = pd.concat([EPDnew_promoters_for_ML_df,
@@ -140,11 +140,21 @@ def main():
     random_seq_RegulonDB_list = list(random_df_RegulonDB['DNA sequence'])
     random_seq_RegulonDB_trimmed = [random_seq[0:80] for random_seq in random_seq_RegulonDB_list]
     random_df_RegulonDB['DNA sequence'] = random_seq_RegulonDB_trimmed
+
+    ecoli_intragenic_seq_df = pd.read_csv('../../data/parsed_genome_transcripts/ecoli_transcriptome_trimmed.csv')
+    num_intra_seqs = ecoli_intragenic_seq_df.shape[0]
+    random_indices = random.sample(range(0, num_intra_seqs), num_RegulonSB_sequences)
+    ecoli_intragenic_seq_df = ecoli_intragenic_seq_df.copy().iloc[random_indices,:]
+
     RegulonDB_promoters_for_ML_df, random_set_counter = create_promoter_df_for_ml(RegulonDB_promoter_positive_df,
                                   RegulonDB_promoter_negative_permuted_df,
                                   random_df_RegulonDB,
                                   # percentage_permuted,
-                                  random_set_counter)
+                                  random_set_counter,'e_coli')
+
+    RegulonDB_promoters_for_ML_df = pd.concat([RegulonDB_promoters_for_ML_df,
+        ecoli_intragenic_seq_df],
+         sort=False).reset_index().drop('index', axis=1)
 
     EPDnew_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/EPDnew_promoters_for_ML.csv', index=False)
     RegulonDB_promoters_for_ML_df.to_csv('../../data/promoters_for_ML/RegulonDB_promoters_for_ML.csv', index=False)
