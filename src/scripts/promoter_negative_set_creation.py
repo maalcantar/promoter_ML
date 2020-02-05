@@ -16,18 +16,24 @@ from matplotlib import pyplot as plt
 from promoter_df_adjustment_util import *
 from promoter_parsing_util import *
 
-## REMOVESEED ##
-# random.seed(777)
-
 def mutate_sequence(sequence, mutation_rate, seed):
 
     """
     mutate nucleotides in a given sequence
 
     inputs
-    sequence: string containing nucleotide sequence -- it is assumed that the sequence only contains 'atcg'
-    mutation_rate: float indicating desired mutation rate (should be values between 0 and 1)
+    sequence: character string
+        nucleotide sequences being mutated
+    mutation_rate: float
+        value indicating desired mutation rate (should be values between 0 and 1)
+    seed: integer
+        random seed
+
+    returns
+    ''.join(new_sequence): character string
+        string containing new, mutated sequence
     """
+
     random.seed(seed)
     new_sequence = []
     for base in sequence:
@@ -44,19 +50,23 @@ def create_permuted_set(promoter_df, number_of_splits, percentage_to_conserve, m
 
     """
     create negative promoter set from existing promoter sequences
-    future iterations may want to pull genomic sequences
 
     inputs
-    promoter_df: dataframe containing promoter sequences
-    number_of_splits: integer indicating how many fragments should be created from the main sequence
-    percentage_to_conserve: float indicating what percentage of sequences should not be permuted
+    promoter_df: pandas dataframe
+    dataframe containing promoter sequences
+    number_of_splits: integer
+        value indicating how many fragments should be created from the main sequence.
+        the sequence lengths should be divisible by this number
+    percentage_to_conserve: float
+        value indicating what percentage of sequences should not be permuted
+        (should be between 0 > percentage_to_conserve >= 1)
 
-    outputs
-    negative_promoter_set: dataframe containing negative promoter set
+    returns
+    negative_promoter_set: pandas dataframe
+        dataframe containing negative promoter set
 
     """
-    ## REMOVESEED ##
-    # random.seed(seed)
+
     promoter_sequences = promoter_df['DNA sequence']
     negative_sequences = []
 
@@ -114,11 +124,14 @@ def generate_random_sequence(num_sequences, sequence_length, seed):
     generates a specified number of random sequences
 
     inputs
-    num_sequences: integer indicating the number of random sequences to be generated
-    sequence_length: integer indicating length of sequences to be generated
+    num_sequences: integer
+     value indicating the number of random sequences to be generated
+    sequence_length: integer
+        vakue indicating length of sequences to be generated
 
-    outputs
-    sequences: list of random sequences
+    returns
+    random_sequences_df: pandas dataframe
+        dataframe with random sequences list of random sequences
     """
     random.seed(seed)
     bases = ['A', 'C', 'T', 'G']
@@ -157,6 +170,7 @@ def main():
 
     random_sequences_df = generate_random_sequence(num_promoter_sequences,600,seed)
 
+    # dataframe with all positive and negative promoter sequences
     promoters_all_df = pd.concat([promoter_df,
                EPDnew_negative_promoters_df,
                RegulonDB_negative_promoters_df,

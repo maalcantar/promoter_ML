@@ -10,10 +10,6 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-### HELPER FUNCTIONS ###
-
-## HELPER FUNCTIONS FOR QC AND FILTERING ##
-
 def calc_range(promoter_sequence_df):
 
     """
@@ -21,16 +17,20 @@ def calc_range(promoter_sequence_df):
     this is done based on the delimiter '/', which surrounds the TSS (+1).
 
     inputs
-    promoter_sequence_df: dataframe containing promoter sequences. sequences must be under column
-    named "range (with respect to TSS)".
+    promoter_sequence_df: pandas dataframe
+        dataframe containing promoter sequences. sequences must be under column
+        named "DNA sequence". There should also be a column named "range
+        (with respect to TSS)" that indicates sequences ranges.
 
-    outputs
-    promoter_sequence_df: dataframe containing promoter sequences with updated "range (with respect to TSS)".
+    returns
+    promoter_sequence_df: pandas dataframe
+        dataframe containing promoter sequences with updated "range (with respect to TSS)".
     """
 
     # loop through dataframe and update range if there is a '/' marking the TSS
     for idx, sequence in promoter_sequence_df['DNA sequence'].iteritems():
 
+        # a '/' character is used to mark the +1 region of some sequences
         if '/' in sequence:
                 seq_split = sequence.split('/')
                 TSS_upstream_len = str(len(seq_split[0]) - 1)
@@ -41,7 +41,28 @@ def calc_range(promoter_sequence_df):
     return(promoter_sequence_df)
 
 def check_sequence_length(promoter_sequence_df):
+
+    """
+    check to see if sequence lengths match lengths indicated in the 'range (with
+    respect to TSS)' columns. if the length of a sequence does not match the
+    indicated range, we remove the range and leave that entry empty
+
+    inputs
+    promoter_sequence_df: pandas dataframe
+        Dataframe containing promoter sequences. sequences must be under column
+        named "DNA sequence". There should also be a column named "range
+        (with respect to TSS)" that indicates sequences ranges.
+
+    returns
+    promoter_sequence_df: pandas dataframe
+        Dataframe containing promoter sequences.
+
+    """
+
     new_ranges = []
+
+    # check to see if indicated range matches sequence range. For exmaple,
+    # -5 to +5 should be 11nt long
     for seq, seq_range in zip(list(promoter_sequence_df['DNA sequence']), list(promoter_sequence_df['range (with respect to TSS)'])):
         seq_range_splt = seq_range.split(' to ')
 
@@ -58,6 +79,7 @@ def check_sequence_length(promoter_sequence_df):
             new_ranges.append(seq_range)
 
     promoter_sequence_df['range (with respect to TSS)'] = new_ranges
+
     return(promoter_sequence_df)
 
 def QC_DNA_sequences(promoter_sequence_df):
@@ -72,11 +94,15 @@ def QC_DNA_sequences(promoter_sequence_df):
     this function also prints out the number of sequences filtered
 
     inputs
-    promoter_sequence_df: dataframe containing promoter sequences. sequences must be under column
-    named "range (with respect to TSS)".
+    promoter_sequence_df: pandas DataFrame
+        Dataframe containing promoter sequences. sequences must be under column
+        named "DNA sequence". There should also be a column named "range
+        (with respect to TSS)" that indicates sequences ranges.
 
-    outputs
-    promoter_sequence_df: dataframe that has undergone QC and filtering
+
+    returns
+    promoter_sequence_df: pandas DataFrame
+        Dataframe that has undergone QC and filtering
     """
 
     original_sequence_number = promoter_sequence_df.shape[0]
@@ -101,6 +127,7 @@ def QC_DNA_sequences(promoter_sequence_df):
     sequences = [seq.replace('{', '').replace('}', '') for seq in sequences]
 
     promoter_sequence_df['DNA sequence'] = sequences
+
     # update range (with respect to TSS)
     promoter_sequence_df = calc_range(promoter_sequence_df)
     sequences = [seq.replace('/', '') for seq in sequences]
@@ -128,13 +155,15 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
     new columns are also added, according the selected database
 
     inputs
-    promoter_sequence_df: dataframe containing promoter sequences and metedata
-    promoter_df_or_type: string indicating promoter database or type.
-        valid string inputs are: "RegulonDB", "DBTBS"
-                string input is NOT case-sensitive
+    promoter_sequence_df: pandas DataFrame
+        dataframe containing promoter sequences and metedata
+    promoter_df_or_type: character string
+        indicating promoter database or type. valid string inputs are: "RegulonDB", "DBTBS"
+        string input is NOT case-sensitive
 
-    outputs
-    promoter_sequence_df: dataframe containing promoter sequences with updated column names
+    returns
+    promoter_sequence_df: pandas DataFrame
+        dataframe containing promoter sequences with updated column names
     """
 
     # standardized column names for RegulonDB dataframe
@@ -187,14 +216,12 @@ def rename_promoter_df_columns(promoter_sequence_df, promoter_df_or_type):
             else:
                 range_new = range_orig
             range_new_list.append(range_new)
-        # DBTBS_range_list_renamed = [str(seq_range).replace(':', ' to ') for seq_range in DBTBS_range_list]
-        # promoter_sequence_df['range (with respect to TSS)'] = DBTBS_range_list_renamed
 
         promoter_sequence_df['range (with respect to TSS)'] = range_new_list
     elif promoter_df_or_type.lower() == 'other':
         accept = 'accept'
     else:
-        print('Error! Please enter a valid promoter dataframe or type: \'RegulonDB\' or \'DBTBS\'')
+        print('Error! Please enter a valid promoter dataframe or database type( \'RegulonDB\' or \'DBTBS\')')
 
     return(promoter_sequence_df)
 
@@ -205,13 +232,16 @@ def reorganize_promoter_df_columns(promoter_sequence_df):
     this will involve dropping some unnecessary columns
 
     inputs
-    promoter_sequence_df: dataframe containing promoter sequences
-        this dataframe will ideally have been passed through the rename_promoter_df_columns function if needed
+    promoter_sequence_df: pandas dataframe
+    dataframe containing promoter sequences. this dataframe will ideally have
+     been passed through the rename_promoter_df_columns function, if needed
 
-    outputs
-    promoter_sequence_df: dataframe with reordered columns
+    returns
+    promoter_sequence_df: pandas dataframe
+        dataframe containing promoter sequences with reordered column name
     """
 
+    # column names that will be presereved
     columns_to_conserve = ['organism', 'database/source', 'DNA sequence', 'regulated gene',
                            'range (with respect to TSS)', 'sigma factor/motif', 'inducer/repressor', 'promoter', 'confidence']
 
@@ -227,19 +257,21 @@ def reorganize_promoter_df_columns(promoter_sequence_df):
 
     return(promoter_sequence_df)
 
-## functions for finding number of motifs in dataset ##
-
 def EPDnew_motifs(EPDnew_promoters_df, save_csv=False):
 
     """
     stratify EPDnew promoters by motif and organism
 
     inputs
-    EPDnew_promoters_df: EPDnew promoter dataframe,
-    save_csv: boolean indicating whether to save csv
+    EPDnew_promoters_df: pandas dataframe
+        dataframe containing EPDnew promoters. this dataframe will ideally have
+        been QCed with renaming and reordering of column names
+    save_csv: boolean
+        indicating whether to save csv
 
-    outputs
-    motifs_occurances_df: dataframe containing matrix of organism x motif (nonTATA, TATA, Inr-pfa, nonInr-pfa, total)
+    returns
+    motifs_occurances_df: pandas dataframe
+        dataframe containing matrix of organism x motif (nonTATA, TATA, Inr-pfa, nonInr-pfa, total)
 
     """
 
@@ -290,11 +322,14 @@ def RegulonDB_motifs(regulonDB_promoters, save_csv=False):
     stratify RegulonDB promoters by sigma factor that binds promoter
 
     inputs
-    regulonDB_promoters: RegulonDB promoter dataframe,
-    save_csv: boolean indicating whether to save csv
+    regulonDB_promoters: pandas dataframe
+        regulondb promoter dataframe
+    save_csv: boolean
+    indicating whether to save csv
 
-    outputs
-    Ecoli_sigma_factor_occurances: dataframe containing matrix of sigma factor x number of promoters
+    returns
+    Ecoli_sigma_factor_occurances: pandas dataframe
+    dataframe containing matrix of sigma factor x number of promoters
     """
 
     # define E. coli sigma factors
@@ -339,11 +374,14 @@ def DBTBS_motifs(DBTBS_promoters_df, save_csv=False):
 
 
     inputs
-    DBTBS_promoters_df: DBTBS promoter dataframe,
-    save_csv: boolean indicating whether to save csv
+    DBTBS_promoters_df: padnas dataframe
+        dataframe with DBTBS promoter sequences
+    save_csv: boolean
+        indicating whether to save csv
 
-    outputs
-    Bsubtilis_sigma_factor_occurances: dataframe containing matrix of sigma factor x number of promoters
+    returns
+    Bsubtilis_sigma_factor_occurances: pandas dataframe
+        dataframe containing matrix of sigma factor x number of promoters
     """
 
     sigma_factors_Bsubtilis = list(set(DBTBS_promoters_df['sigma factor/motif']))
@@ -354,6 +392,7 @@ def DBTBS_motifs(DBTBS_promoters_df, save_csv=False):
         SF_count = DBTBS_promoters_df[DBTBS_promoters_df['sigma factor/motif'].str.contains(sigma_factor[0:5])].shape[0]
         Bsubtilis_sigma_factor_count_dict.update({sigma_factor: SF_count})
 
+    # create dataframe and sort from biggest to smalles
     Bsubtilis_sigma_factor_occurances = pd.DataFrame.from_dict(Bsubtilis_sigma_factor_count_dict,orient='index')
     Bsubtilis_sigma_factor_occurances.loc["total",:] = DBTBS_promoters_df.shape[0]
     Bsubtilis_sigma_factor_occurances = Bsubtilis_sigma_factor_occurances.rename(columns = {0:"B. subtilis"}).sort_values(by="B. subtilis")

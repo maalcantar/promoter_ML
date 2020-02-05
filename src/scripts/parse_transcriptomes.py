@@ -242,6 +242,7 @@ def parse_athaliana_transcriptome(save_csv=True):
     plant_transcriptome_df['class'] = 0
     plant_transcriptome_df = plant_transcriptome_df.reset_index().drop('index', axis=1)
 
+    # trim sequences to match required length
     trimmed_sequences = []
     for sequence in plant_transcriptome_df['DNA sequence']:
         highest_start = len(sequence) - 600

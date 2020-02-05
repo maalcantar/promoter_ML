@@ -16,13 +16,18 @@ def trim_promter_seq(promoter_df, new_range, dataset_to_trim):
     reduce size of the promoter sequences according to newly specified range
 
     inputs
-    promoter_df: dataframe containing promoter sequences
-    new_range: list containing new range for promoter sequences (e.g., [-249, 50])
-    dataset_to_trim: string indicating which dataset to trim
-        valid inputs are: 'EPDnew', 'RegulonDB', 'DBTBS', 'bacterial inducible promoters'
+    promoter_df: pandas dataframe
+        dataframe containing promoter sequences
+    new_range: 2-element integer list
+        list containing new range for promoter sequences (e.g., [-249, 50])
+    dataset_to_trim: character string
+        string indicating which dataset to trim
+        valid inputs are: 'EPDnew', 'RegulonDB', 'DBTBS', 'bacterial inducible promoters',
+        bacterial inducible promoters
 
-    outputs
-    promoter_df: dataframe with updated promoter sequences
+    returns
+        promoter_df: pandas dataframe
+            dataframe with trimmed promoter sequences
     """
 
     # split dataframe based on which dataset we need to trim
